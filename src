@@ -1,0 +1,279 @@
+#ifndef CONSTANTS_H
+#define CONSTANTS_H
+
+#define H 6
+#define ROWS 6
+#define W 11
+#define COLS 11
+
+#endif
+#ifndef MAP_H
+#define MAP_H
+//----------------------------------------------
+
+
+class Map{
+	private:
+		std::vector<bool> valid;
+		std::vector<float> queue;
+		uint32_t ROWS; uint32_t H;
+		uint32_t COLS; uint32_t W;
+		int rowi; int coli;
+		int rowf; int colf;
+	public:
+		Map(const std::vector<float>&, uint32_t, uint32_t);
+		~Map();
+	private:
+		Map() = delete;
+		Map(const Map&) = delete;
+		Map& operator=(const Map&) = delete;
+	public:
+		float* operator[](int);
+		void SpecSrc(int, int);
+		void SpecDest(int, int);
+		float PopQueue(int*, int*);
+		void UpdateMap(int, int, float);
+		bool QueueEmpty() const;
+		float DistanceToSrc(int, int) const;
+		float DistanceToDest(int, int) const;
+};
+
+//----------------------------------------------
+#endif
+#ifndef PATH_FINDER_H
+#define PATH_FINDER_H
+//------------------------------------
+
+
+#include "pos.h"
+
+
+#include <vector>
+
+namespace Kha{
+	class PathFinder{
+		private:
+			Map map;
+			std::vector<Pos> route;
+		public:
+			PathFinder(const std::vector<int32_t>&);
+			~PathFinder();
+		private:
+			PathFinder() = delete;
+			PathFinder(const PathFinder&) = delete;
+			PathFinder& operator=(const PathFinder&) = delete;
+		public:
+			bool FindPath();
+			std::vector<Pos> GetRoute() const;
+	};
+}
+
+//------------------------------------
+#endif
+
+#include "constants.h"
+#include "map.h"
+
+#include <iostream>
+#include <queue>
+#include <functional>
+#include <vector>
+
+
+void PrintMap(Map&);
+
+
+int main(void){
+	//create map
+	std::vector<float> mapping {
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -2, -2, -2, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -1,
+		-1, -1, -1, -2, -2, -2, -2, -2, -2, -2, -1,
+		-1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+	};
+	Map map(mapping, ROWS, COLS);
+	PrintMap(map);
+
+	//define src and dest
+	map.SpecSrc(5, 3);
+	map.SpecDest(1, 7);
+	PrintMap(map);
+
+	while(!map.QueueEmpty()){
+		int r = -1;
+		int c = -1;
+		float distance = map.PopQueue(&r, &c); //this call syncs state and queue and return smallest distance
+		//check left
+		std::cout<<r<<" "<<c<<"\n";
+		int cl = c-1;
+		if(cl>=0){
+		if(map[r][cl]==0) break;
+			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(r,cl);
+			map.UpdateMap(r, cl, dist);
+			if(map[r][cl]==-1 || dist<map[r][cl]){
+				map[r][cl] = dist;
+			}
+		}
+		//check right
+		int cr = c+1;
+		if(cr<COLS){
+		if(map[r][cr]==0) break;
+			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(r,cr);
+			map.UpdateMap(r, cr, dist);
+			if(map[r][cr]==-1 || dist<map[r][cr]){
+				map[r][cr] = dist;
+			}
+		}
+		//check up
+		int ru = r-1;
+		if(ru>=0){
+		if(map[ru][c]==0) break;
+			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(ru,c);
+			map.UpdateMap(ru, c, dist);
+			if(map[ru][c]==-1 || dist<map[ru][c]){
+				map[ru][c] = dist;
+			}
+		}
+		//check down
+		int rd = r+1;
+		if(rd<ROWS){
+		if(map[rd][c]==0) break;
+			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(rd,c);
+			map.UpdateMap(rd, c, dist);
+			if(map[rd][c]==-1 || dist<map[rd][c]){
+				map[rd][c] = dist;
+			}
+		}
+	}
+		PrintMap(map);
+
+	
+
+	return 0;
+}
+
+void PrintMap(Map& map){
+	for(int i=0; i<ROWS; ++i){
+		for(int j=0; j<W; ++j){
+			std::cout<<map[i][j]<<" ";
+		}
+		std::cout<<"\n";
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+main(){
+	if(moved){
+		std::vector<int32_t> map {};
+
+		Kha::PathFinder path_finder(map);
+
+		path_finder.FindPath();
+		std::vector<Kha::Pos> = path_finder.GetRoute();
+	}
+}
+
+*/
+#include "map.h"
+
+#include <cstring>
+#include <cmath>
+#include <iostream>
+#include <vector>
+
+
+Map::Map(const std::vector<float>& mapping, uint32_t rows, uint32_t cols): rowi(-1), coli(-1), rowf(-1), colf(-1), ROWS(rows), H(rows), COLS(cols), W(cols){
+	queue = mapping;
+	valid.resize(queue.size());
+	std::memset(valid, 0, valid.size()*sizeof(bool));
+}
+
+Map::~Map(){}
+
+float* Map::operator[](int row){
+	return queue+row*W;
+}
+
+
+//which ever gets specified last is responsible for setting src's distance
+
+void Map::SpecSrc(int row, int col){
+	rowi = row;
+	coli = col;
+	if(colf!=-1){
+		float distance = sqrt(pow(rowf-rowi, 2)+pow(colf-coli, 2));
+		UpdateMap(rowi, coli, distance);
+	}
+}
+
+void Map::SpecDest(int row, int col){
+	rowf = row;
+	colf = col;
+	(*this)[row][col] = 0;
+	if(coli!=-1){
+		float distance = sqrt(pow(rowf-rowi, 2)+pow(colf-coli, 2));
+		UpdateMap(rowi, coli, distance);
+	}
+}
+
+float Map::PopQueue(int* r, int* c){
+	float dist = 100000.0f;
+	for(int i=0; i<ROWS*COLS; ++i){
+		if(valid[i] && queue[i]<dist && queue[i]!=-2){
+			dist = queue[i];
+			*r = i/W;
+			*c = i%W;
+		}
+	}
+	valid[*r*W+*c] = false;
+	return dist;
+}
+
+void Map::UpdateMap(int r, int c, float dist){
+	int index = r*W+c;
+	if(queue[index]==-1 || dist<queue[index]){
+		valid[index] = true;
+		queue[index] = dist;
+	}
+}
+
+bool Map::QueueEmpty() const{
+	bool result = true;
+	for(int i=0; i<ROWS*COLS; ++i){
+		if(valid[i]){
+			result = false;
+			break;
+		}
+	}
+	return result;
+}
+
+float Map::DistanceToSrc(int r, int c) const{
+	return (float)sqrt(pow(r-rowi, 2)+pow(c-coli, 2));
+}
+
+float Map::DistanceToDest(int r, int c) const{
+	return (float)sqrt(pow(r-rowf, 2)+pow(c-colf, 2));
+}
+#include "pathfinder.h"
+
+
+
+Kha::PathFinder::PathFinder(const std::vector<int32_t>& mapping){
+
+}

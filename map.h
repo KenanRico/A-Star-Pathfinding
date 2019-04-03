@@ -2,17 +2,17 @@
 #define MAP_H
 //----------------------------------------------
 
-#include "constants.h"
 
 class Map{
 	private:
-		float state[ROWS*COLS];
-		bool valid[ROWS*COLS];
-		float queue[ROWS*COLS];
+		std::vector<bool> valid;
+		std::vector<float> queue;
+		uint32_t ROWS; uint32_t H;
+		uint32_t COLS; uint32_t W;
 		int rowi; int coli;
 		int rowf; int colf;
 	public:
-		Map(int (&array)[ROWS][COLS]);
+		Map(const std::vector<float>&, uint32_t, uint32_t);
 		~Map();
 	private:
 		Map() = delete;

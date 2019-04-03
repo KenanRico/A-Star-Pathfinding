@@ -13,15 +13,15 @@ void PrintMap(Map&);
 
 int main(void){
 	//create map
-	int map_array[H][W] = {
-		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		{-1, -2, -2, -2, -1, -1, -1, -1, -1, -1, -1},
-		{-1, -1, -1, -2, -1, -1, -1, -1, -1, -2, -1},
-		{-1, -1, -1, -2, -2, -1, -2, -2, -2, -2, -1},
-		{-1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1},
-		{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
+	std::vector<float> mapping {
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+		-1, -2, -2, -2, -1, -1, -1, -1, -1, -1, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -2, -1,
+		-1, -1, -1, -2, -2, -2, -2, -2, -2, -2, -1,
+		-1, -1, -1, -2, -2, -1, -1, -1, -1, -2, -1,
+		-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 	};
-	Map map(map_array);
+	Map map(mapping, ROWS, COLS);
 	PrintMap(map);
 
 	//define src and dest
@@ -90,3 +90,30 @@ void PrintMap(Map& map){
 		std::cout<<"\n";
 	}
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+main(){
+	if(moved){
+		std::vector<int32_t> map {};
+
+		Kha::PathFinder path_finder(map);
+
+		path_finder.FindPath();
+		std::vector<Kha::Pos> = path_finder.GetRoute();
+	}
+}
+
+*/

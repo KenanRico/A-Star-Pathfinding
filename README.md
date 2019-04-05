@@ -21,5 +21,5 @@ bool Kha::PathFinder::FindPath(
 const std::vector<Pos>& Kha::PathFinder::GetRoute();
 ~~~
 Supply your map via a vector of floats, where -1's are open spaces and -2's are walls (obsticles).
-PathFinder objects cache mapping and route info for optimization for subsequent searches, so it is recommanded to reuse the same PathFinder object
-main.cpp serves as a sample use case
+PathFinder objects cache mapping and route info for optimization for subsequent searches, so it is recommanded to reuse the same PathFinder object.
+"main.cpp" serves as a sample use case

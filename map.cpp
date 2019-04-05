@@ -4,24 +4,29 @@
 #include <cmath>
 #include <iostream>
 #include <vector>
+#include <cstdint>
 
 
-Map::Map(const std::vector<float>& mapping, uint32_t rows, uint32_t cols): rowi(-1), coli(-1), rowf(-1), colf(-1), ROWS(rows), H(rows), COLS(cols), W(cols){
+Kha::Map::Map(const std::vector<float>& mapping, int rows, int cols): rowi(-1), coli(-1), rowf(-1), colf(-1), ROWS(rows), H(rows), COLS(cols), W(cols){
 	queue = mapping;
-	valid.resize(queue.size());
-	std::memset(valid, 0, valid.size()*sizeof(bool));
+	//valid.resize(queue.size());
+	//std::memset(&valid.at(0), 0, valid.size()*sizeof(bool));
+	valid.reserve(queue.size());
+	for(int i=0; i<queue.size(); ++i){
+		valid.push_back(false);
+	}
 }
 
-Map::~Map(){}
+Kha::Map::~Map(){}
 
-float* Map::operator[](int row){
-	return queue+row*W;
+float* Kha::Map::operator[](int row){
+	return &queue[0]+row*W;
 }
 
 
 //which ever gets specified last is responsible for setting src's distance
 
-void Map::SpecSrc(int row, int col){
+void Kha::Map::SpecSrc(int row, int col){
 	rowi = row;
 	coli = col;
 	if(colf!=-1){
@@ -30,7 +35,7 @@ void Map::SpecSrc(int row, int col){
 	}
 }
 
-void Map::SpecDest(int row, int col){
+void Kha::Map::SpecDest(int row, int col){
 	rowf = row;
 	colf = col;
 	(*this)[row][col] = 0;
@@ -40,7 +45,7 @@ void Map::SpecDest(int row, int col){
 	}
 }
 
-float Map::PopQueue(int* r, int* c){
+float Kha::Map::PopQueue(int* r, int* c){
 	float dist = 100000.0f;
 	for(int i=0; i<ROWS*COLS; ++i){
 		if(valid[i] && queue[i]<dist && queue[i]!=-2){
@@ -53,7 +58,7 @@ float Map::PopQueue(int* r, int* c){
 	return dist;
 }
 
-void Map::UpdateMap(int r, int c, float dist){
+void Kha::Map::UpdateMap(int r, int c, float dist){
 	int index = r*W+c;
 	if(queue[index]==-1 || dist<queue[index]){
 		valid[index] = true;
@@ -61,7 +66,7 @@ void Map::UpdateMap(int r, int c, float dist){
 	}
 }
 
-bool Map::QueueEmpty() const{
+bool Kha::Map::QueueEmpty() const{
 	bool result = true;
 	for(int i=0; i<ROWS*COLS; ++i){
 		if(valid[i]){
@@ -72,10 +77,10 @@ bool Map::QueueEmpty() const{
 	return result;
 }
 
-float Map::DistanceToSrc(int r, int c) const{
+float Kha::Map::DistanceToSrc(int r, int c) const{
 	return (float)sqrt(pow(r-rowi, 2)+pow(c-coli, 2));
 }
 
-float Map::DistanceToDest(int r, int c) const{
+float Kha::Map::DistanceToDest(int r, int c) const{
 	return (float)sqrt(pow(r-rowf, 2)+pow(c-colf, 2));
 }

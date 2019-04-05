@@ -12,25 +12,21 @@
 namespace Kha{
 	class PathFinder{
 		private:
-			Map map;
+			std::vector<float> mapping;
 			std::vector<Pos> route;
+			bool result;
 		public:
-			PathFinder(const std::vector<float>&, int, int);
+			PathFinder();
 			~PathFinder();
 		private:
-			PathFinder() = delete;
 			PathFinder(const PathFinder&) = delete;
 			PathFinder& operator=(const PathFinder&) = delete;
 		public:
-			void SetSrc(int, int);
-			void SetDest(int, int);
-			bool FindPath();
-			std::vector<Pos> GetRoute() const;
+			bool FindPath(const std::vector<float>&, int, int, int, int, int, int);
+			const std::vector<Pos>& GetRoute() const;
 	};
 }
 
-//helper
-bool Reachable(const Kha::Pos&, const Kha::Pos&);
 
 //------------------------------------
 #endif

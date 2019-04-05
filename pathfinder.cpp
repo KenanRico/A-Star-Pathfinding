@@ -2,13 +2,26 @@
 #include "pos.h"
 
 #include <vector>
-#include <iostream>
-#include <cstdlib>
+//#include <iostream>
+//#include <cstdlib>
+#include <cstring>
 #include <algorithm>
 #include <cmath>
 
 
-Kha::PathFinder::PathFinder(const std::vector<float>& mapping, int row, int col): map(mapping, row, col){
+
+//helper functions
+
+bool Reachable(const Kha::Pos& a, const Kha::Pos& b){
+	return (float)sqrt(pow(a.row-b.row,2)+pow(a.col-b.col,2))==1.0f;
+	//return true;
+}
+
+
+
+//PathFinder functions
+
+Kha::PathFinder::PathFinder(): result(false){
 	
 }
 
@@ -16,9 +29,18 @@ Kha::PathFinder::~PathFinder(){
 	
 }
 
-bool Kha::PathFinder::FindPath(){
+bool Kha::PathFinder::FindPath(const std::vector<float>& _mapping, int row, int col, int src_r, int src_c, int dest_r, int dest_c){
 
-	bool path_found = false;
+	//if current mapping is identical to cached mapping, return previous result
+	int mapping_size = mapping.size();
+	if(mapping_size==_mapping.size() && std::memcmp(&mapping.at(0), &_mapping.at(0), sizeof(mapping.at(0)*mapping_size))){
+		return result;
+	}
+
+	//declare map for tracking search state
+	Map map(_mapping, row, col);
+	map.SpecSrc(src_r, src_c);
+	map.SpecDest(dest_r, dest_c);
 
 	//declare path storage to store full path travelled
 	std::vector<Pos> full_path;
@@ -33,7 +55,7 @@ bool Kha::PathFinder::FindPath(){
 		//std::cout<<r<<" "<<c<<"\n";
 		int cl = c-1;
 		if(cl>=0){
-		if(map[r][cl]==0) {path_found = true; break; }
+		if(map[r][cl]==0) {result = true; break; }
 			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(r,cl);
 			map.UpdateMap(r, cl, dist);
 			if(map[r][cl]==-1 || dist<map[r][cl]){
@@ -43,7 +65,7 @@ bool Kha::PathFinder::FindPath(){
 		//check right
 		int cr = c+1;
 		if(cr<map.COLS){
-		if(map[r][cr]==0) {path_found = true; break; }
+		if(map[r][cr]==0) {result = true; break; }
 			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(r,cr);
 			map.UpdateMap(r, cr, dist);
 			if(map[r][cr]==-1 || dist<map[r][cr]){
@@ -53,7 +75,7 @@ bool Kha::PathFinder::FindPath(){
 		//check up
 		int ru = r-1;
 		if(ru>=0){
-		if(map[ru][c]==0) {path_found = true; break; }
+		if(map[ru][c]==0) {result = true; break; }
 			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(ru,c);
 			map.UpdateMap(ru, c, dist);
 			if(map[ru][c]==-1 || dist<map[ru][c]){
@@ -63,7 +85,7 @@ bool Kha::PathFinder::FindPath(){
 		//check down
 		int rd = r+1;
 		if(rd<map.ROWS){
-		if(map[rd][c]==0) {path_found = true; break; }
+		if(map[rd][c]==0) {result = true; break; }
 			float dist = map.DistanceToSrc(r, c)+1.0f+map.DistanceToDest(rd,c);
 			map.UpdateMap(rd, c, dist);
 			if(map[rd][c]==-1 || dist<map[rd][c]){
@@ -73,37 +95,25 @@ bool Kha::PathFinder::FindPath(){
 	}
 
 	//If a path is found, backtrace to find actual route from full path
-	if(path_found){
-		int full_length = full_path.size();
+	if(result){
 		route.clear();
-		route.reserve(full_length);
-		route.push_back(full_path.at(full_length-1));
-		for(int i=full_length-2; i>=0; --i){
+		//route.push_back(full_path.at(full_length-1));
+		route.push_back(Pos(dest_r, dest_c));
+		for(int i=0, j=full_path.size(); i<j; ++i){
 			Pos const * last = &route.at(route.size()-1);
 			if(Reachable(*last, full_path[i])){
 				route.push_back(full_path[i]);
+				j = i;
+				i = 0;
 			}
 		}
 		std::reverse(route.begin(), route.end());
 	}
 
-	return path_found;
+	return result;
 }
 
-std::vector<Kha::Pos> Kha::PathFinder::GetRoute() const{
+const std::vector<Kha::Pos>& Kha::PathFinder::GetRoute() const{
 	return route;
 }
 
-
-void Kha::PathFinder::SetSrc(int r, int c){
-	map.SpecSrc(r, c);
-}
-
-void Kha::PathFinder::SetDest(int r, int c){
-	map.SpecDest(r, c);
-}
-
-bool Reachable(const Kha::Pos& a, const Kha::Pos& b){
-	return (float)sqrt(pow(a.row-b.row,2)+pow(a.col-b.col,2))==1.0f;
-	//return true;
-}

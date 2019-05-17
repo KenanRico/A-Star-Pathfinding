@@ -4,12 +4,12 @@ A* Pathfinding is a backtracking + greedy approach to pathfinding algorithm. Thi
 
 ## Usage
 To integrate the code into your projects, include the pathfinder and pos header into your codebase:
-~~~
+```cpp
 #include "pathfinder.h"
 #include "pos.h"
-~~~
+```
 Resources reside in the Kha namespace. The call to finding optimal paths are:
-~~~
+```cpp
 //generate path in PathFinder instance
 bool Kha::PathFinder::FindPath(
 	const std::vector<float>& mapping,
@@ -19,7 +19,7 @@ bool Kha::PathFinder::FindPath(
 );
 //return optimal route
 const std::vector<Pos>& Kha::PathFinder::GetRoute();
-~~~
+```
 Supply your map via a vector of floats, where -1's are open spaces and -2's are walls (obsticles).
 PathFinder objects cache mapping and route info for optimization for subsequent searches, so it is recommanded to reuse the same PathFinder object.
 "main.cpp" serves as a sample use case

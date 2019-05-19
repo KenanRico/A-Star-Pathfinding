@@ -1,7 +1,4 @@
-
-#include "map.h"
-#include "pos.h"
-#include "pathfinder.h"
+#include "include/pathfind.h"
 
 #include <iostream>
 #include <functional>
